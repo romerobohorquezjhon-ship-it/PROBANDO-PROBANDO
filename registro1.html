@@ -1,183 +1,62 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Empleado — Fast Food</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="min-h-screen flex items-center justify-center p-4 py-10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+<?php
+// ============================================
+// CONEXIÓN A BASE DE DATOS
+// ============================================
 
-    <div class="card w-full max-w-sm border-t-4 border-cyan-500 fade-in">
+// Configuración de conexión
+$host = "localhost";
+$user = "root";
+$pass = "";  // Sin contraseña en XAMPP por defecto
+$database = "fastfood_db";
 
-        <!-- Header -->
-        <div class="mb-6">
-            <a href="index.html"
-               class="text-[10px] text-gray-500 hover:text-cyan-400 uppercase tracking-widest
-                      transition-colors font-bold inline-flex items-center gap-1">
-                ← Volver al Login
-            </a>
-            <h2 class="text-3xl font-black text-white mt-3 uppercase"
-                style="font-family:'Bebas Neue',sans-serif; letter-spacing:0.05em;">
-                Registro de Empleado
-            </h2>
-            <p class="text-xs text-gray-500 mt-1">
-                Completa tus datos para acceder al sistema
-            </p>
-        </div>
+// Crear conexión
+$conn = new mysqli($host, $user, $pass, $database);
 
-        <!-- Formulario -->
-        <form id="regForm" class="space-y-4">
-            
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase block mb-1">Nombre</label>
-                <input type="text" id="nombre" placeholder="Tu nombre" 
-                       class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg 
-                              text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500
-                              focus:bg-slate-600 transition-all" required>
-            </div>
+// Verificar conexión
+if ($conn->connect_error) {
+    die(json_encode([
+        'success' => false,
+        'message' => 'Error de conexión: ' . $conn->connect_error
+    ]));
+}
 
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase block mb-1">Apellidos</label>
-                <input type="text" id="apellidos" placeholder="Tus apellidos" 
-                       class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg 
-                              text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500
-                              focus:bg-slate-600 transition-all" required>
-            </div>
+// Configurar charset UTF-8
+$conn->set_charset("utf8");
 
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase block mb-1">Email</label>
-                <input type="email" id="correo_electronico" placeholder="tu@email.com" 
-                       class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg 
-                              text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500
-                              focus:bg-slate-600 transition-all" required>
-            </div>
+// Habilitar errores en modo desarrollo
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase block mb-1">Teléfono</label>
-                <input type="tel" id="telefono" placeholder="3001234567" 
-                       class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg 
-                              text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500
-                              focus:bg-slate-600 transition-all" required>
-            </div>
+// Función para hashear contraseñas
+function hashPassword($password) {
+    return password_hash($password, PASSWORD_BCRYPT);
+}
 
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase block mb-1">Rol</label>
-                <select id="rol" 
-                        class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg 
-                               text-white focus:outline-none focus:border-cyan-500
-                               focus:bg-slate-600 transition-all" required>
-                    <option value="">Selecciona un rol</option>
-                    <option value="mesero">Mesero</option>
-                    <option value="cocina">Cocina</option>
-                    <option value="admin">Administrador</option>
-                </select>
-            </div>
+// Función para verificar contraseñas
+function verifyPassword($password, $hash) {
+    return password_verify($password, $hash);
+}
 
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase block mb-1">Contraseña</label>
-                <input type="password" id="password" placeholder="••••••" 
-                       class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg 
-                              text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500
-                              focus:bg-slate-600 transition-all" required>
-            </div>
+// Función para log de auditoría
+function logAuditoria($conn, $usuario_id, $accion, $descripcion) {
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $query = "INSERT INTO auditoria (usuario_id, accion, descripcion, ip_address) 
+              VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param("isss", $usuario_id, $accion, $descripcion, $ip);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
 
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase block mb-1">Confirmar Contraseña</label>
-                <input type="password" id="password2" placeholder="••••••" 
-                       class="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg 
-                              text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500
-                              focus:bg-slate-600 transition-all" required>
-            </div>
-
-            <button type="submit" 
-                    class="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 
-                           hover:to-blue-500 text-white font-black uppercase text-sm rounded-lg
-                           transition-all active:scale-95 shadow-lg tracking-widest mt-6">
-                🚀 Registrarse
-            </button>
-        </form>
-
-        <p class="text-center text-[10px] text-gray-600 mt-4">
-            ¿Ya tienes cuenta?
-            <a href="index.html" class="text-cyan-500 hover:text-cyan-400 transition-colors font-bold ml-1">
-                Iniciar sesión
-            </a>
-        </p>
-    </div>
-
-    <script src="registro.js"></script>
-    <script>
-        // Reemplazar el evento de registro para usar la BD
-        document.addEventListener('DOMContentLoaded', () => {
-            const regForm = document.getElementById('regForm');
-            if (regForm) {
-                regForm.removeEventListener('submit', regForm.onsubmit);
-                
-                regForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const nombre = document.getElementById('nombre').value.trim();
-                    const apellidos = document.getElementById('apellidos').value.trim();
-                    const correo = document.getElementById('correo_electronico').value.trim();
-                    const telefono = document.getElementById('telefono').value.trim();
-                    const password = document.getElementById('password').value;
-                    const password2 = document.getElementById('password2').value;
-                    const rol = document.getElementById('rol').value;
-
-                    if (!nombre || !apellidos || !correo || !telefono || !password || !rol) {
-                        showToast('Completa todos los campos', 'error');
-                        return;
-                    }
-
-                    if (password !== password2) {
-                        showToast('Las contraseñas no coinciden', 'error');
-                        return;
-                    }
-
-                    if (password.length < 4) {
-                        showToast('La contraseña debe tener al menos 4 caracteres', 'warning');
-                        return;
-                    }
-
-                    // Enviar a la BD
-                    try {
-                        const response = await fetch('registrar.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                nombre,
-                                apellidos,
-                                correo_electronico: correo,
-                                telefono,
-                                password,
-                                password2,
-                                rol
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            showToast(`¡Bienvenido, ${nombre}! 🎉`, 'success');
-                            localStorage.setItem('ff_session', nombre);
-                            setTimeout(() => {
-                                window.location.href = 'roles1.html';
-                            }, 900);
-                        } else {
-                            showToast(data.error || 'Error en el registro', 'error');
-                        }
-                    } catch (error) {
-                        showToast('Error de conexión: ' + error.message, 'error');
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+// Función para responder JSON
+function respuesta($success, $message, $data = []) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => $success,
+        'message' => $message,
+        'data' => $data
+    ]);
+    exit;
+}
+?>
