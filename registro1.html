@@ -29,18 +29,75 @@
             </p>
         </div>
 
-        <form action="registrar.php" method="POST">
-    <input type="text" name="nombre" placeholder="Nombre completo" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Contraseña" required>
-    <select name="rol" required>
-        <option value="">Selecciona un rol</option>
-        <option value="admin">Administrador</option>
-        <option value="mesero">Mesero</option>
-        <option value="cocina">Cocina</option>
-    </select>
-    <button type="submit">Registrar</button>
-</form>
+        <form id="regForm" class="space-y-3">
+
+            <!-- Nombre -->
+            <div>
+                <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1.5 font-bold">
+                    Nombre <span class="text-red-500">*</span>
+                </label>
+                <input id="nombre" type="text" placeholder="Ej. María"
+                       class="input-style" required minlength="2" autocomplete="given-name">
+            </div>
+
+            <!-- Apellidos -->
+            <div>
+                <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1.5 font-bold">
+                    Apellidos <span class="text-red-500">*</span>
+                </label>
+                <input id="apellidos" type="text" placeholder="Ej. García López"
+                       class="input-style" required minlength="2" autocomplete="family-name">
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+                <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1.5 font-bold">
+                    Teléfono <span class="text-red-500">*</span>
+                </label>
+                <input id="telefono" type="tel" placeholder="Ej. 3001234567"
+                       class="input-style" required pattern="[0-9]{7,15}" autocomplete="tel">
+            </div>
+
+            <!-- Correo -->
+            <div>
+                <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1.5 font-bold">
+                    Correo Electrónico <span class="text-red-500">*</span>
+                </label>
+                <input id="correo_electronico" type="email" placeholder="Ej. maria@empresa.com"
+                       class="input-style" required autocomplete="email">
+            </div>
+
+            <!-- Separador -->
+            <div class="pt-2 pb-1">
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest font-bold border-t border-gray-800 pt-3">
+                    Credenciales de Acceso
+                </p>
+            </div>
+
+            <!-- Contraseña -->
+            <div>
+                <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1.5 font-bold">
+                    Contraseña <span class="text-red-500">*</span>
+                </label>
+                <input id="password" type="password" placeholder="Mínimo 4 caracteres"
+                       class="input-style" required minlength="4" autocomplete="new-password">
+            </div>
+
+            <!-- Confirmar Contraseña -->
+            <div>
+                <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1.5 font-bold">
+                    Confirmar Contraseña <span class="text-red-500">*</span>
+                </label>
+                <input id="password2" type="password" placeholder="Repite la contraseña"
+                       class="input-style" required minlength="4" autocomplete="new-password">
+            </div>
+
+            <!-- Submit -->
+            <button type="submit"
+                class="btn-primary w-full mt-4 text-sm font-black uppercase tracking-widest py-4">
+                Crear Cuenta y Continuar →
+            </button>
+        </form>
 
         <p class="text-center text-[10px] text-gray-600 mt-4">
             ¿Ya tienes cuenta?
